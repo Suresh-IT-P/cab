@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Cabs | Premium Cab Booking Service</title>
+    <meta name="description"
+        content="Book professional 5-seater and 7-seater cabs. Real-time fare calculation, professional drivers, and scheduled reservations.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <header class="header">
+        <nav class="container nav">
+            <div class="logo">
+                <span class="logo-accent">Elite</span>Cabs
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#fleet">Our Fleet</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            <button class="btn btn-primary nav-cta">Book Now</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="hero-bg"></div>
+            <div class="container hero-content">
+                <div class="hero-text">
+                    <h1>Elite Professional <br><span class="text-accent">Travel Solutions</span></h1>
+                    <p>Experience the gold standard in premium transportation. Book your high-end journey with
+                        professional captains.</p>
+                    <div style="margin-top: 3rem; display: flex; gap: 1.5rem;">
+                        <button class="btn btn-primary">Book Now</button>
+                        <button class="btn" style="border: 1px solid rgba(255,255,255,0.3); color: white;">View
+                            Fleet</button>
+                    </div>
+                </div>
+
+                <div class="booking-widget">
+                    <div class="widget-tabs">
+                        <button class="tab-btn active" data-type="oneway">One Way</button>
+                        <button class="tab-btn" data-type="round">Round Trip</button>
+                        <button class="tab-btn" data-type="rental">Local Rental</button>
+                    </div>
+
+                    <form id="booking-form" class="widget-form">
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label for="pickup">Pickup Location</label>
+                                <input type="text" id="pickup" placeholder="Enter pickup address" required>
+                                <div id="pickup-suggestions" class="suggestions"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="drop">Drop Location</label>
+                                <input type="text" id="drop" placeholder="Enter destination" required>
+                                <div id="drop-suggestions" class="suggestions"></div>
+                            </div>
+                            <div class="input-group">
+                                <label for="pickup-date">Departure Date</label>
+                                <input type="date" id="pickup-date" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="pickup-time">Departure Time</label>
+                                <input type="time" id="pickup-time" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="passengers">Passengers</label>
+                                <input type="number" id="passengers" min="1" max="20" value="1" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="vehicle-type">Vehicle Preference</label>
+                                <select id="vehicle-type">
+                                    <option value="auto">Auto Select</option>
+                                    <option value="sedan">Premium Sedan (5 Seater)</option>
+                                    <option value="suv">Luxury SUV (7 Seater)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="fare-estimate" class="fare-estimate hidden">
+                            <div class="fare-details">
+                                <p>Estimated Distance: <span id="distance-val">0</span> km</p>
+                                <p>Estimated Fare: <span id="fare-val">₹0</span></p>
+                            </div>
+                            <div class="vehicle-auto-badge" id="vehicle-badge">
+                                Standard Sedan
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-large btn-submit">Check Availability & Fare</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="fleet" class="fleet section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Our Professional <span class="text-accent">Fleet</span></h2>
+                    <p>Choose the perfect ride for your comfort and style.</p>
+                </div>
+                <div class="fleet-grid">
+                    <div class="fleet-card">
+                        <div class="fleet-img" id="sedan-img"></div>
+                        <div class="fleet-info">
+                            <h3>Premium Sedan</h3>
+                            <p>Perfect for corporate travel and small families. Comfortably seats up to 4 passengers.
+                            </p>
+                            <ul class="fleet-features">
+                                <li>4+1 Seater</li>
+                                <li>AC / Climate Control</li>
+                                <li>Professional Driver</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="fleet-card">
+                        <div class="fleet-img" id="suv-img"></div>
+                        <div class="fleet-info">
+                            <h3>Luxury SUV</h3>
+                            <p>Spacious and powerful. Ideal for groups, long trips, and extra luggage.</p>
+                            <ul class="fleet-features">
+                                <li>6+1 Seater</li>
+                                <li>Extra Legroom</li>
+                                <li>Premium Sound System</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="features" class="section" style="background: var(--white);">
+            <div class="container">
+                <div class="section-header">
+                    <h2>The <span class="text-accent">Elite</span> Standard</h2>
+                    <p>Why corporate houses and premium travelers choose our services.</p>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-card" style="text-align: center;">
+                        <h4 style="margin-top: 1rem;">Safety First</h4>
+                        <p style="margin-top: 1rem; opacity: 0.7;">Verified captains and real-time SOS tracking for
+                            every journey.</p>
+                    </div>
+                    <div class="stat-card" style="text-align: center;">
+                        <h4 style="margin-top: 1rem;">Luxury Interior</h4>
+                        <p style="margin-top: 1rem; opacity: 0.7;">Pristine vehicles with premium climate control and
+                            refreshments.</p>
+                    </div>
+                    <div class="stat-card" style="text-align: center;">
+                        <h4 style="margin-top: 1rem;">Fixed Fares</h4>
+                        <p style="margin-top: 1rem; opacity: 0.7;">No hidden charges or surge pricing. Transparent elite
+                            billing.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <div class="logo"><span class="logo-accent">Elite</span>Cabs</div>
+                <p>Redefining professional transportation services since 2024.</p>
+            </div>
+            <div class="footer-links">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">About Us</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+            <div class="footer-contact">
+                <h4>Contact Us</h4>
+                <p>Email: support@elitecabs.com</p>
+                <p>Phone: +91 98765 43210</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 Elite Cabs. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

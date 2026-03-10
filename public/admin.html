@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Elite Cabs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="admin-layout">
+    <aside class="sidebar">
+        <div class="logo"><span class="logo-accent">Elite</span>Cabs</div>
+        <ul class="sidebar-links">
+            <li class="active">Overview</li>
+            <li>Bookings</li>
+            <li>Fleet Management</li>
+            <li>Financials</li>
+            <li>Settings</li>
+        </ul>
+    </aside>
+    <main class="main-content">
+        <div class="header-content">
+            <h1>Platform <span class="text-accent">Overview</span></h1>
+            <p>Monitor your fleet's real-time performance.</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h4>Total Revenue</h4>
+                <div class="value">₹45,200</div>
+                <div class="trend trend-up">↑ 12.5% vs last month</div>
+            </div>
+            <div class="stat-card">
+                <h4>Total Bookings</h4>
+                <div class="value">154</div>
+                <p>8 active rides now</p>
+            </div>
+            <div class="stat-card">
+                <h4>Active Drivers</h4>
+                <div class="value">12</div>
+                <p>3 currently on break</p>
+            </div>
+        </div>
+
+        <table class="booking-table">
+            <thead>
+                <tr>
+                    <th>Job ID</th>
+                    <th>User</th>
+                    <th>Route</th>
+                    <th>Fare</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="admin-booking-list">
+                <tr>
+                    <td>#B1024</td>
+                    <td>John Doe</td>
+                    <td>Airport → Marriot</td>
+                    <td>₹850</td>
+                    <td><span class="badge badge-success">Completed</span></td>
+                </tr>
+                <tr>
+                    <td>#B1025</td>
+                    <td>Sarah Smith</td>
+                    <td>Downtown → Mall</td>
+                    <td>₹240</td>
+                    <td><span class="badge badge-warning">In Transit</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        async function loadAdminData() {
+            try {
+                // Load Stats
+                const statsResponse = await fetch('/api/admin/stats');
+                const stats = await statsResponse.json();
+
+                document.querySelectorAll('.stat-card .value')[0].textContent = `₹${stats.revenue.toLocaleString()}`;
+                document.querySelectorAll('.stat-card .value')[1].textContent = stats.totalBookings;
+                document.querySelectorAll('.stat-card .value')[2].textContent = stats.activeDrivers;
+
+                // Load Bookings (Driver Jobs endpoint used for demo simplicity)
+                const bookingsResponse = await fetch('/api/driver/jobs');
+                const bookings = await bookingsResponse.json();
+                const tbody = document.getElementById('admin-booking-list');
+
+                if (bookings.length > 0) {
+                    tbody.innerHTML = '';
+                    bookings.forEach(booking => {
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>#B${booking.id}</td>
+                            <td>User #${booking.user_id}</td>
+                            <td>${booking.pickup_loc} → ${booking.drop_loc}</td>
+                            <td>${booking.fare}</td>
+                            <td><span class="badge ${getStatusBadge(booking.status)}">${booking.status}</span></td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (err) {
+                console.error('Error loading admin data:', err);
+            }
+        }
+
+        function getStatusBadge(status) {
+            switch (status.toLowerCase()) {
+                case 'completed': return 'badge-success';
+                case 'pending': return 'badge-warning';
+                case 'cancelled': return 'badge-danger';
+                default: return 'badge-warning';
+            }
+        }
+
+        loadAdminData();
+        // Refresh every 30 seconds
+        setInterval(loadAdminData, 30000);
+    </script>
+</body>
+
+</html>
