@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Cabs | My Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet for Mission Tracking -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <style>
+        .dashboard-container {
+            padding: 120px 0;
+            background: var(--light-grey);
+            min-height: 100vh;
+        }
+
+        .dashboard-header {
+            margin-bottom: 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-card {
+            background: var(--white);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            border: 1px solid var(--accents);
+        }
+
+        #mission-map {
+            height: 400px;
+            width: 100%;
+            border-radius: 20px;
+            border: 4px solid var(--white);
+            box-shadow: var(--shadow-md);
+            margin-top: 1rem;
+            z-index: 10;
+        }
+
+        /* Radar Pulse Animation */
+        .radar-pulse {
+            position: relative;
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #10B981;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .radar-pulse::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 2px solid #10B981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            opacity: 0;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .rides-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .rides-table th {
+            text-align: left;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
+            border-bottom: 1px solid var(--accents);
+        }
+
+        .rides-table td {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+            font-size: 0.95rem;
+        }
+
+        .status-pill {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .status-assigned {
+            background: #CCE5FF;
+            color: #004085;
+        }
+
+        .status-completed {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .status-cancelled {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 5rem;
+            color: var(--text-muted);
+        }
+
+        /* Responsive Dashboard */
+        @media (max-width: 768px) {
+            .nav {
+                padding: 0 1rem;
+            }
+
+            .logo {
+                font-size: 1.3rem !important;
+            }
+
+            .driver-nav-actions {
+                gap: 0.5rem !important;
+            }
+
+            .driver-nav-actions button {
+                padding: 0.5rem 0.8rem !important;
+                font-size: 0.75rem !important;
+            }
+
+            .dashboard-container {
+                padding: 100px 0 50px;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 2rem;
+                margin-bottom: 3rem;
+            }
+
+            .dashboard-header h1 {
+                font-size: 2rem;
+            }
+
+            .history-card {
+                padding: 1.5rem;
+                border-radius: 16px;
+            }
+
+            #rides-list {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .rides-table {
+                min-width: 600px;
+            }
+
+            .rides-table th,
+            .rides-table td {
+                padding: 1rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="container nav">
+            <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer">
+                <span class="logo-accent">Elite</span>Traveler
+            </div>
+            <div class="driver-nav-actions" style="display: flex; gap: 0.8rem; align-items: center;">
+                <button class="btn" onclick="window.location.href='index.html'"
+                    style="padding: 0.6rem 1rem; font-size: 0.85rem; border: 1px solid var(--accents); background: var(--white); color: var(--dark-charcoal);">Home</button>
+                <button class="btn btn-primary" onclick="logoutUser()"
+                    style="padding: 0.6rem 1rem; font-size: 0.85rem; background: var(--primary-red); border: none;">Logout</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="dashboard-container">
+        <div class="container">
+            <div class="dashboard-header">
+                <div>
+                    <h1>Welcome back, <span id="user-name" class="text-accent">User</span></h1>
+                    <p>Track your premium journey history and current bookings.</p>
+                </div>
+                <button class="btn btn-primary" onclick="window.location.href='index.html'">Book New Ride</button>
+            </div>
+
+            <!-- Elite Stats Bar -->
+            <div id="elite-stats"
+                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1%; margin-bottom: 4rem;">
+                <div class="history-card" style="margin-bottom: 0; padding: 20px; text-align: center;">
+                    <div
+                        style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">
+                        Total Journeys</div>
+                    <div id="stat-total" style="font-size: 2.5rem; font-weight: 800; color: var(--primary-red);">0</div>
+                </div>
+                <div class="history-card" style="margin-bottom: 0; padding: 10px; text-align: center;">
+                    <div
+                        style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">
+                        Account Status</div>
+                    <div style="font-size: 1.8rem; font-weight: 800; color: var(--dark-charcoal);">Elite Member</div>
+                </div>
+                <div class="history-card" style="margin-bottom: 0; padding: 20px; text-align: center;">
+                    <div
+                        style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 1px;">
+                        Recent Mission</div>
+                    <div id="stat-recent" style="font-size: 1.1rem; font-weight: 700; margin-top: 0.5rem;">None</div>
+                </div>
+            </div>
+
+            <!-- Active Mission Tracker -->
+            <div id="active-mission-container" class="hidden">
+                <div class="history-card" style="border-left: 5px solid var(--primary-red); background: #fffcfc;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem;">
+                        <h3><span class="radar-pulse"></span> Mission Intelligence Radar</h3>
+                        <span id="active-status" class="status-pill status-assigned">TRACKING</span>
+                    </div>
+
+                    <div id="mission-map"></div>
+
+                    <div id="active-details"
+                        style="display: grid; grid-template-columns: 2fr 1fr; gap: 4rem; margin-top: 2rem;">
+                        <!-- Assigned dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="history-card">
+                <h3>Your Ride History</h3>
+                <div id="rides-list">
+                    <table class="rides-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Trip</th>
+                                <th>Date & Time</th>
+                                <th>Vehicle</th>
+                                <th>Fare</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rides-body">
+                            <!-- Rides will be loaded here -->
+                        </tbody>
+                    </table>
+                    <div id="no-rides" class="empty-state hidden">
+                        <p>No rides found. Begin your journey today!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let isMapInitialized = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = JSON.parse(localStorage.getItem('elite_member'));
+            if (!user) {
+                window.location.href = 'auth.html';
+                return;
+            }
+
+            document.getElementById('user-name').textContent = user.name;
+
+            loadDashboardData(user);
+            // Live Update Radar Poll
+            setInterval(() => loadDashboardData(user), 5000);
+        });
+
+        async function loadDashboardData(user) {
+
+            try {
+                const res = await fetch(`/api/user/bookings/${user.id}`);
+                const rides = await res.json();
+
+                const body = document.getElementById('rides-body');
+                body.innerHTML = '';
+
+                if (rides.length === 0) {
+                    document.getElementById('no-rides').classList.remove('hidden');
+                    return;
+                } else {
+                    document.getElementById('no-rides').classList.add('hidden');
+                }
+
+                // Stats Calculation
+                document.getElementById('stat-total').textContent = rides.length;
+                if (rides[0]) {
+                    document.getElementById('stat-recent').textContent = `Mission #B${rides[0].id}`;
+                }
+
+                // Find Active Mission (Last pending or assigned)
+                const activeMission = rides.find(r => r.status === 'pending' || r.status === 'assigned');
+                if (activeMission) {
+                    const container = document.getElementById('active-mission-container');
+                    const details = document.getElementById('active-details');
+                    const statusTag = document.getElementById('active-status');
+
+                    container.classList.remove('hidden');
+                    statusTag.className = `status-pill status-${activeMission.status}`;
+                    statusTag.textContent = activeMission.status.toUpperCase();
+
+                    let activeDriver = 'Searching for Elite Pilot...';
+                    if (activeMission.driver_name) {
+                        activeDriver = `
+                            <div style="font-weight:700; font-size:1.2rem; color:var(--primary-red); margin-bottom:0.5rem;">${activeMission.driver_name}</div>
+                            <div style="color:var(--dark-charcoal); font-weight:600;">${activeMission.car_model} - ${activeMission.car_number}</div>
+                            <div style="margin-top:1rem;"><a href="tel:${activeMission.driver_phone}" class="btn btn-primary" style="padding:0.7rem 1.5rem;">Call Pilot</a></div>
+                        `;
+                    }
+
+                    details.innerHTML = `
+                        <div>
+                            <div style="margin-bottom:1.5rem;">
+                                <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">From:</div>
+                                <div style="font-weight:700; font-size:1.1rem;">${activeMission.pickup_loc}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">To:</div>
+                                <div style="font-weight:700; font-size:1.1rem;">${activeMission.drop_loc}</div>
+                            </div>
+                            <div style="margin-top:2rem; padding:1.5rem; background:white; border-radius:15px; border:1px solid #eee;">
+                                <div style="font-weight:600; color:var(--primary-red);">Mission Intelligence</div>
+                                <div style="font-size:0.9rem; margin-top:0.5rem;">Distance: ${activeMission.distance || 'Calculated on trip'} KM</div>
+                                <div style="font-size:0.9rem;">Estimated Fare: ${activeMission.fare}</div>
+                            </div>
+                        </div>
+                        <div style="background:var(--light-grey); padding:2rem; border-radius:20px; text-align:center; display:flex; flex-direction:column; justify-content:center;">
+                            <div style="font-size:0.7rem; text-transform:uppercase; color:var(--text-muted); font-weight:700; margin-bottom:1rem;">Your Captain</div>
+                            ${activeDriver}
+                        </div>
+                    `;
+
+                    // MAP INITIALIZATION
+                    if (!isMapInitialized) {
+                        isMapInitialized = true;
+                        setTimeout(async () => {
+                            const m = L.map('mission-map').setView([13.08, 80.27], 13);
+                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+
+                            const geocode = async (addr) => {
+                                try {
+                                    const r = await fetch(`https://photon.komoot.io/api?q=${encodeURIComponent(addr)}&limit=1`);
+                                    const d = await r.json();
+                                    return d.features[0]?.geometry.coordinates;
+                                } catch (e) { return null; }
+                            };
+
+                            const pCoords = await geocode(activeMission.pickup_loc);
+                            const dCoords = await geocode(activeMission.drop_loc);
+
+                            if (pCoords && dCoords) {
+                                const pMarker = L.marker([pCoords[1], pCoords[0]]).addTo(m).bindPopup('Pickup');
+                                const dMarker = L.marker([dCoords[1], dCoords[0]]).addTo(m).bindPopup('Destination');
+
+                                // Draw Route
+                                try {
+                                    const routeRes = await fetch(`https://router.project-osrm.org/route/v1/driving/${pCoords[0]},${pCoords[1]};${dCoords[0]},${dCoords[1]}?overview=full&geometries=geojson`);
+                                    const routeData = await routeRes.json();
+                                    L.geoJSON(routeData.routes[0].geometry, { style: { color: "#B71C1C", weight: 5, opacity: 0.7 } }).addTo(m);
+                                } catch (e) { }
+
+                                const group = new L.featureGroup([pMarker, dMarker]);
+                                m.fitBounds(group.getBounds().pad(0.2));
+                            }
+                        }, 500);
+                    }
+                }
+
+                rides.forEach(ride => {
+                    const row = document.createElement('tr');
+                    const idText = `<div style="font-weight:800; color:var(--primary-red)">#B${ride.id}</div>`;
+
+                    let driverDetails = '<div style="font-size:0.8rem; color:var(--text-muted)">Awaiting Assignment...</div>';
+                    if (ride.driver_name) {
+                        driverDetails = `
+                            <div style="font-weight:600">👤 ${ride.driver_name}</div>
+                            <div style="font-size:0.8rem">🚗 ${ride.car_model} (${ride.car_number})</div>
+                            <div style="font-size:0.8rem">📞 <a href="tel:${ride.driver_phone}" style="color:var(--primary-red)">${ride.driver_phone}</a></div>
+                        `;
+                    }
+
+                    row.innerHTML = `
+                        <td>${idText}</td>
+                        <td>
+                            <div style="font-weight:600">${ride.pickup_loc}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted)">to ${ride.drop_loc}</div>
+                            <div style="margin-top:0.5rem">${driverDetails}</div>
+                        </td>
+                        <td>
+                            <div>${new Date(ride.pickup_date).toLocaleDateString()}</div>
+                            <div style="font-size:0.8rem">${ride.pickup_time}</div>
+                        </td>
+                        <td>${ride.vehicle_type.toUpperCase()}</td>
+                        <td style="font-weight:700">${ride.fare}</td>
+                        <td><span class="status-pill status-${ride.status}">${ride.status}</span></td>
+                    `;
+                    body.appendChild(row);
+                });
+            } catch (err) {
+                console.error('Failed to load rides:', err);
+            }
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('elite_member');
+            window.location.href = 'auth.html';
+        }
+    </script>
+</body>
+
+</html>

@@ -4,122 +4,984 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard | Elite Cabs</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Elite Control Center | Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        :root {
+            --admin-sidebar: #1a1a1a;
+            --admin-bg: #f8f9fa;
+        }
+
+        body {
+            background: var(--admin-bg);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--admin-sidebar);
+            color: white;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: var(--transition);
+        }
+
+        .sidebar .logo {
+            margin-bottom: 4rem;
+            cursor: pointer;
+        }
+
+        .sidebar-nav {
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            padding: 1.2rem;
+            margin-bottom: 0.5rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0.7;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+        }
+
+        .nav-item.active {
+            border-left: 4px solid var(--primary-red);
+        }
+
+        .main-stage {
+            flex-grow: 1;
+            padding: 3rem;
+            overflow-y: auto;
+            background: var(--admin-bg);
+            scroll-behavior: smooth;
+        }
+
+        /* Premium Scrollbar for the Stage */
+        .main-stage::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .main-stage::-webkit-scrollbar-track {
+            background: var(--admin-bg);
+        }
+
+        .main-stage::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .main-stage::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .stage-header {
+            margin-bottom: 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-banner {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .b-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .b-card h4 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .b-card .val {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-charcoal);
+        }
+
+        .data-table-container {
+            background: white;
+            border-radius: 30px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.03);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Custom Scrollbar */
+        .data-table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .data-table-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .data-table-container::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .data-table-container::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-red);
+        }
+
+        .elite-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .elite-table th {
+            text-align: left;
+            padding: 1.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .elite-table td {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f8f8f8;
+            font-size: 0.95rem;
+        }
+
+        .status-tag {
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff8e1;
+            color: #ffa000;
+        }
+
+        .status-assigned {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .status-completed {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .status-cancelled {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary-red);
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .action-btn:hover {
+            text-decoration: underline;
+        }
+
+        .tab-section {
+            display: none;
+        }
+
+        .tab-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Laptop Optimization */
+        @media (max-width: 1366px) {
+            .sidebar {
+                width: 220px;
+                padding: 1.5rem;
+            }
+
+            .main-stage {
+                padding: 2.5rem;
+            }
+
+            .stat-banner {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+
+            .b-card {
+                padding: 2rem;
+            }
+
+            .b-card .val {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .stat-banner {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .sidebar {
+                width: 200px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                z-index: 10000;
+                transition: var(--transition);
+                width: 260px;
+                box-shadow: 20px 0 50px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .mobile-header {
+                display: flex;
+                background: var(--admin-sidebar);
+                color: white;
+                padding: 1.25rem 2rem;
+                justify-content: space-between;
+                align-items: center;
+                position: sticky;
+                top: 0;
+                z-index: 9000;
+            }
+
+            .sidebar .logo {
+                margin-bottom: 3rem;
+            }
+
+            .sidebar-nav {
+                display: block;
+            }
+
+            .main-stage {
+                padding: 1.5rem;
+                overflow: visible;
+            }
+
+            .data-table-container {
+                padding: 1.25rem;
+                border-radius: 15px;
+            }
+
+            .stage-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .stat-banner {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .b-card {
+                padding: 1.5rem;
+            }
+
+            .b-card .val {
+                font-size: 1.6rem;
+            }
+        }
+
+        /* Modal Styles */
+        .map-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .map-modal-content {
+            background: white;
+            padding: 0;
+            border-radius: 24px;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            animation: modalSlideUp 0.4s ease;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .map-header {
+            background: var(--admin-sidebar);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-map {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .close-map:hover {
+            opacity: 1;
+        }
+
+        .btn-large {
+            padding: 1.2rem;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-red);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(183, 28, 28, 0.2);
+        }
+
+        .mobile-header {
+            display: none;
+        }
+
+        /* --- RESPONSIVE COMMAND DECK --- */
+        @media (max-width: 1024px) {
+            body {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            .mobile-header {
+                display: flex;
+                background: var(--admin-sidebar);
+                color: white;
+                padding: 1.25rem 2rem;
+                justify-content: space-between;
+                align-items: center;
+                position: sticky;
+                top: 0;
+                z-index: 9000;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                height: 100vh;
+                z-index: 10000;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                width: 280px;
+                background: var(--admin-sidebar);
+                padding-top: 5rem;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .sidebar-nav {
+                display: block;
+            }
+
+            .main-stage {
+                padding: 1.5rem;
+                overflow: visible;
+            }
+
+            .stat-banner {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .data-table-container {
+                padding: 1rem;
+                border-radius: 12px;
+            }
+
+            .stage-header h1 {
+                font-size: 1.6rem;
+            }
+
+            .burger-menu {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                cursor: pointer;
+                z-index: 10001;
+                width: 44px;
+                height: 44px;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .burger-menu span {
+                display: block;
+                width: 25px;
+                height: 2px;
+                background: white;
+                transition: 0.3s;
+                border-radius: 2px;
+            }
+
+            /* Transformation to X */
+            .burger-menu.active span:nth-child(1) {
+                transform: translateY(7px) rotate(45deg);
+            }
+
+            .burger-menu.active span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .burger-menu.active span:nth-child(3) {
+                transform: translateY(-7px) rotate(-45deg);
+            }
+        }
+    </style>
 </head>
 
-<body class="admin-layout">
-    <aside class="sidebar">
-        <div class="logo"><span class="logo-accent">Elite</span>Cabs</div>
-        <ul class="sidebar-links">
-            <li class="active">Overview</li>
-            <li>Bookings</li>
-            <li>Fleet Management</li>
-            <li>Financials</li>
-            <li>Settings</li>
-        </ul>
+<body>
+    <div class="mobile-header">
+        <div class="logo" style="margin:0">
+            <span class="logo-accent">Executive</span>Control
+        </div>
+        <div class="burger-menu" id="admin-burger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    <aside class="sidebar" id="admin-sidebar">
+        <div class="logo">
+            <span class="logo-accent">Executive</span>Control
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-item active" onclick="switchTab('overview', this)">📊 Execution Overview</div>
+            <div class="nav-item" onclick="switchTab('bookings', this)">🚕 Mission Control</div>
+            <div class="nav-item" onclick="switchTab('drivers', this)">🏎️ Manage Drivers</div>
+            <div class="nav-item" onclick="switchTab('users', this)">👥 Member Registry</div>
+        </div>
+        <div class="nav-item" onclick="logoutAdmin()">🚪 Sign Out</div>
     </aside>
-    <main class="main-content">
-        <div class="header-content">
-            <h1>Platform <span class="text-accent">Overview</span></h1>
-            <p>Monitor your fleet's real-time performance.</p>
+
+    <main class="main-stage">
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-section active">
+            <div class="stage-header">
+                <div>
+                    <h1>Platform <span class="text-accent">Insight</span></h1>
+                    <p>Real-time performance analytics for the fleet.</p>
+                </div>
+            </div>
+
+            <div class="stat-banner">
+                <div class="b-card">
+                    <h4>Total Revenue</h4>
+                    <div class="val" id="stat-revenue">₹0</div>
+                </div>
+                <div class="b-card">
+                    <h4>Live Missions</h4>
+                    <div class="val" id="stat-active">0</div>
+                </div>
+                <div class="b-card">
+                    <h4>Partners</h4>
+                    <div class="val" id="stat-drivers">0</div>
+                </div>
+                <div class="b-card">
+                    <h4>Member Base</h4>
+                    <div class="val" id="stat-users">0</div>
+                </div>
+            </div>
+
+            <div class="data-table-container">
+                <h3 style="margin-bottom: 2rem;">Recent Missions</h3>
+                <table class="elite-table">
+                    <thead>
+                        <tr>
+                            <th>Mission ID</th>
+                            <th>Member</th>
+                            <th>Deployment</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="overview-table-body">
+                        <!-- Loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h4>Total Revenue</h4>
-                <div class="value">₹45,200</div>
-                <div class="trend trend-up">↑ 12.5% vs last month</div>
+        <!-- Bookings Tab -->
+        <div id="bookings" class="tab-section">
+            <div class="stage-header">
+                <h1>Mission <span class="text-accent">Logs</span></h1>
             </div>
-            <div class="stat-card">
-                <h4>Total Bookings</h4>
-                <div class="value">154</div>
-                <p>8 active rides now</p>
-            </div>
-            <div class="stat-card">
-                <h4>Active Drivers</h4>
-                <div class="value">12</div>
-                <p>3 currently on break</p>
+            <div class="data-table-container">
+                <table class="elite-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Trip Data</th>
+                            <th>Crew Assigned</th>
+                            <th>Status</th>
+                            <th>Operation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookings-table-body">
+                        <!-- Loaded via JS -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
-        <table class="booking-table">
-            <thead>
-                <tr>
-                    <th>Job ID</th>
-                    <th>User</th>
-                    <th>Route</th>
-                    <th>Fare</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody id="admin-booking-list">
-                <tr>
-                    <td>#B1024</td>
-                    <td>John Doe</td>
-                    <td>Airport → Marriot</td>
-                    <td>₹850</td>
-                    <td><span class="badge badge-success">Completed</span></td>
-                </tr>
-                <tr>
-                    <td>#B1025</td>
-                    <td>Sarah Smith</td>
-                    <td>Downtown → Mall</td>
-                    <td>₹240</td>
-                    <td><span class="badge badge-warning">In Transit</span></td>
-                </tr>
-            </tbody>
-        </table>
+        <!-- Drivers Tab -->
+        <div id="drivers" class="tab-section">
+            <div class="stage-header">
+                <h1>Manage <span class="text-accent">Drivers</span></h1>
+                <p>Manage and audit professional driver partners.</p>
+            </div>
+            <!-- Create Driver Section -->
+            <div class="data-table-container"
+                style="margin-bottom: 3rem; background: var(--admin-sidebar); color: white;">
+                <h3 style="margin-bottom: 2rem;">Induct Partner Pilot</h3>
+                <form id="create-driver-form"
+                    style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                    <div class="input-group">
+                        <label style="color: rgba(255,255,255,0.7);">Full Name</label>
+                        <input type="text" id="d-name" placeholder="Pilot Name" required
+                            style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: white;">
+                    </div>
+                    <div class="input-group">
+                        <label style="color: rgba(255,255,255,0.7);">Email</label>
+                        <input type="email" id="d-email" placeholder="pilot@elite.com" required
+                            style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: white;">
+                    </div>
+                    <div class="input-group">
+                        <label style="color: rgba(255,255,255,0.7);">Access Key (Password)</label>
+                        <input type="text" id="d-pass" placeholder="Pilot123!" required
+                            style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: white;">
+                    </div>
+                    <div class="input-group">
+                        <label style="color: rgba(255,255,255,0.7);">Phone</label>
+                        <input type="text" id="d-phone" placeholder="Pilot Signal" required
+                            style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: white;">
+                    </div>
+                    <div class="input-group">
+                        <label style="color: rgba(255,255,255,0.7);">Vehicle Model</label>
+                        <input type="text" id="d-car" placeholder="Black Sedan" required
+                            style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: white;">
+                    </div>
+                    <div class="input-group">
+                        <label style="color: rgba(255,255,255,0.7);">Vehicle ID (Number Plate)</label>
+                        <input type="text" id="d-num" placeholder="TN 01 ELITE" required
+                            style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.1); color: white;">
+                    </div>
+                    <div style="grid-column: span 3;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Authorize Partner
+                            Pilot</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="data-table-container">
+                <table class="elite-table">
+                    <thead>
+                        <tr>
+                            <th>Pilot ID</th>
+                            <th>Details</th>
+                            <th>Vehicle ID</th>
+                            <th>Model</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fleet-table-body">
+                        <!-- Loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Users Tab -->
+        <div id="users" class="tab-section">
+            <div class="stage-header">
+                <h1>Network <span class="text-accent">Registry</span></h1>
+            </div>
+            <div class="data-table-container">
+                <table class="elite-table">
+                    <thead>
+                        <tr>
+                            <th>Member ID</th>
+                            <th>Identity</th>
+                            <th>Classification</th>
+                            <th>Vehicle ID</th>
+                            <th>Engagement</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- Loaded via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </main>
 
+    <!-- Edit Driver Modal -->
+    <div id="edit-driver-modal" class="map-modal" style="display: none;">
+        <div class="map-modal-content" style="max-width: 500px;">
+            <div class="map-header">
+                <h3>Update Pilot Registry</h3>
+                <button class="close-map" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div style="padding: 2rem;">
+                <form id="edit-driver-form">
+                    <input type="hidden" id="edit-d-id">
+                    <div class="input-group">
+                        <label>Pilot Name</label>
+                        <input type="text" id="edit-d-name" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="edit-d-phone" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Vehicle Model</label>
+                        <input type="text" id="edit-d-car" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Vehicle ID (Plate)</label>
+                        <input type="text" id="edit-d-num" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large" style="width:100%; margin-top: 1rem;">Update
+                        Authorization</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script>
-        async function loadAdminData() {
+        // Check if admin is logged in (Role Isolation)
+        const user = JSON.parse(localStorage.getItem('elite_master'));
+        if (!user) {
+            window.location.href = 'admin-login.html';
+        }
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            el.classList.add('active');
+
+            // Close mobile menu if open
+            const sidebar = document.getElementById('admin-sidebar');
+            const burger = document.getElementById('admin-burger');
+            if (window.innerWidth <= 768) {
+                sidebar.classList.remove('active');
+                burger.classList.remove('active');
+            }
+
+            loadTabData(tabId);
+        }
+
+        // Mobile Sidebar Logic
+        const adminBurger = document.getElementById('admin-burger');
+        const adminSidebar = document.getElementById('admin-sidebar');
+
+        if (adminBurger && adminSidebar) {
+            adminBurger.addEventListener('click', () => {
+                adminBurger.classList.toggle('active');
+                adminSidebar.classList.toggle('active');
+            });
+        }
+
+        async function loadTabData(tabId) {
             try {
-                // Load Stats
-                const statsResponse = await fetch('/api/admin/stats');
-                const stats = await statsResponse.json();
+                if (tabId === 'overview') {
+                    const res = await fetch('/api/admin/stats');
+                    const stats = await res.json();
+                    document.getElementById('stat-revenue').textContent = `₹${stats.revenue.toLocaleString()}`;
+                    document.getElementById('stat-active').textContent = stats.activeBookings;
+                    document.getElementById('stat-drivers').textContent = stats.totalDrivers;
+                    document.getElementById('stat-users').textContent = stats.totalUsers;
 
-                document.querySelectorAll('.stat-card .value')[0].textContent = `₹${stats.revenue.toLocaleString()}`;
-                document.querySelectorAll('.stat-card .value')[1].textContent = stats.totalBookings;
-                document.querySelectorAll('.stat-card .value')[2].textContent = stats.activeDrivers;
-
-                // Load Bookings (Driver Jobs endpoint used for demo simplicity)
-                const bookingsResponse = await fetch('/api/driver/jobs');
-                const bookings = await bookingsResponse.json();
-                const tbody = document.getElementById('admin-booking-list');
-
-                if (bookings.length > 0) {
-                    tbody.innerHTML = '';
-                    bookings.forEach(booking => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>#B${booking.id}</td>
-                            <td>User #${booking.user_id}</td>
-                            <td>${booking.pickup_loc} → ${booking.drop_loc}</td>
-                            <td>${booking.fare}</td>
-                            <td><span class="badge ${getStatusBadge(booking.status)}">${booking.status}</span></td>
+                    const resB = await fetch('/api/admin/bookings');
+                    const bookings = await resB.json();
+                    const body = document.getElementById('overview-table-body');
+                    body.innerHTML = '';
+                    bookings.slice(0, 5).forEach(b => {
+                        body.innerHTML += `
+                            <tr>
+                                <td>#B${b.id}</td>
+                                <td>${b.customer_name}</td>
+                                <td>${b.pickup_loc} → ${b.drop_loc}</td>
+                                <td><span class="status-tag status-${b.status}">${b.status}</span></td>
+                                <td><button class="action-btn" onclick="cancelBooking(${b.id})">Abort</button></td>
+                            </tr>
                         `;
-                        tbody.appendChild(tr);
+                    });
+                } else if (tabId === 'bookings') {
+                    const res = await fetch('/api/admin/bookings');
+                    const bookings = await res.json();
+                    const body = document.getElementById('bookings-table-body');
+                    body.innerHTML = '';
+                    bookings.forEach(b => {
+                        body.innerHTML += `
+                            <tr>
+                                <td>#B${b.id}</td>
+                                <td>
+                                    <strong>${b.pickup_loc}</strong><br>
+                                    <span style="font-size:0.8rem; color:#888">${b.drop_loc}</span>
+                                </td>
+                                <td>${b.driver_name || 'Unassigned'}</td>
+                                <td><span class="status-tag status-${b.status}">${b.status}</span></td>
+                                <td><button class="action-btn" onclick="cancelBooking(${b.id})">Cancel Mission</button></td>
+                            </tr>
+                        `;
+                    });
+                } else if (tabId === 'drivers') {
+                    const res = await fetch('/api/admin/drivers');
+                    const drivers = await res.json();
+                    const body = document.getElementById('fleet-table-body');
+                    body.innerHTML = '';
+                    drivers.forEach(d => {
+                        body.innerHTML += `
+                            <tr>
+                                <td>#P${d.id}</td>
+                                <td>
+                                    <strong>${d.name}</strong><br>
+                                    <span style="font-size:0.8rem; color:#888">${d.email}</span>
+                                </td>
+                                <td>${d.car_number || '---'}</td>
+                                <td>${d.car_model || '---'}</td>
+                                <td>
+                                    <button class="action-btn" onclick="openEditModal(${JSON.stringify(d).replace(/"/g, '&quot;')})">Edit</button>
+                                    <button class="action-btn" style="color:#888; margin-left:10px" onclick="deleteDriver(${d.id})">Revoke</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                } else if (tabId === 'users') {
+                    const res = await fetch('/api/admin/users');
+                    const passengers = await res.json();
+                    const body = document.getElementById('users-table-body');
+                    body.innerHTML = '';
+                    passengers.forEach(u => {
+                        body.innerHTML += `
+                            <tr>
+                                <td>#U${u.id}</td>
+                                <td>
+                                    <strong>${u.name}</strong><br>
+                                    <span style="font-size:0.8rem; color:#888">${u.email}</span>
+                                </td>
+                                <td><span style="text-transform:uppercase; font-weight:700">Passenger</span></td>
+                                <td>N/A</td>
+                                <td><button class="action-btn" style="color:#888" onclick="deletePassenger(${u.id})">Revoke Access</button></td>
+                            </tr>
+                        `;
                     });
                 }
-            } catch (err) {
-                console.error('Error loading admin data:', err);
-            }
+            } catch (err) { console.error(err); }
         }
 
-        function getStatusBadge(status) {
-            switch (status.toLowerCase()) {
-                case 'completed': return 'badge-success';
-                case 'pending': return 'badge-warning';
-                case 'cancelled': return 'badge-danger';
-                default: return 'badge-warning';
-            }
+        async function cancelBooking(id) {
+            if (!confirm('Abort this mission?')) return;
+            try {
+                const res = await fetch('/api/bookings/update-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId: id, status: 'cancelled' })
+                });
+                if (res.ok) loadTabData('overview');
+            } catch (err) { alert('Action failed'); }
         }
 
-        loadAdminData();
-        // Refresh every 30 seconds
-        setInterval(loadAdminData, 30000);
+        async function deletePassenger(id) {
+            if (!confirm('Revoke member access to the network?')) return;
+            try {
+                const res = await fetch('/api/admin/delete-passenger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                if (res.ok) loadTabData('users');
+            } catch (err) { alert('Revocation failed'); }
+        }
+
+        async function deleteDriver(id) {
+            if (!confirm('Permanently de-authorize this Pilot from the fleet?')) return;
+            try {
+                const res = await fetch('/api/admin/delete-driver', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id })
+                });
+                if (res.ok) loadTabData('drivers');
+            } catch (err) { alert('Revocation failed'); }
+        }
+
+        function logoutAdmin() {
+            localStorage.removeItem('elite_master');
+            window.location.href = 'admin-login.html';
+        }
+
+        // Handle Driver Creation
+        document.getElementById('create-driver-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('d-name').value,
+                email: document.getElementById('d-email').value,
+                password: document.getElementById('d-pass').value,
+                phone: document.getElementById('d-phone').value,
+                car_model: document.getElementById('d-car').value,
+                car_number: document.getElementById('d-num').value
+            };
+
+            try {
+                const res = await fetch('/api/admin/create-driver', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    alert('Partner Authorized Successfully!');
+                    document.getElementById('create-driver-form').reset();
+                    loadTabData('drivers');
+                } else {
+                    const err = await res.json();
+                    alert(err.error);
+                }
+            } catch (err) { alert('Authorization failed'); }
+        });
+
+        function openEditModal(d) {
+            document.getElementById('edit-d-id').value = d.id;
+            document.getElementById('edit-d-name').value = d.name;
+            document.getElementById('edit-d-phone').value = d.phone || '';
+            document.getElementById('edit-d-car').value = d.car_model || '';
+            document.getElementById('edit-d-num').value = d.car_number || '';
+            document.getElementById('edit-driver-modal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-driver-modal').style.display = 'none';
+        }
+
+        document.getElementById('edit-driver-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                id: document.getElementById('edit-d-id').value,
+                name: document.getElementById('edit-d-name').value,
+                phone: document.getElementById('edit-d-phone').value,
+                car_model: document.getElementById('edit-d-car').value,
+                car_number: document.getElementById('edit-d-num').value
+            };
+
+            try {
+                const res = await fetch('/api/admin/update-driver', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    alert('Pilot Registry Updated Successfully.');
+                    closeEditModal();
+                    loadTabData('drivers');
+                } else {
+                    const err = await res.json();
+                    alert(err.error);
+                }
+            } catch (err) { alert('Update sequence failed.'); }
+        });
+
+        // Initial Load
+        loadTabData('overview');
+
+        // Central Command Live Radar Poll (5 seconds)
+        setInterval(() => {
+            const activeTab = document.querySelector('.nav-item.active').dataset.tab;
+            loadTabData(activeTab);
+        }, 5000);
     </script>
 </body>
 

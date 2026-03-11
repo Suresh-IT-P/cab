@@ -11,23 +11,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <!-- Leaflet for Map Selection -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 </head>
 
 <body>
-    <header class="header">
-        <nav class="container nav">
-            <div class="logo">
-                <span class="logo-accent">Elite</span>Cabs
-            </div>
-            <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#fleet">Our Fleet</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <button class="btn btn-primary nav-cta">Book Now</button>
-        </nav>
-    </header>
 
     <main>
         <section id="home" class="hero">
@@ -37,10 +26,17 @@
                     <h1>Elite Professional <br><span class="text-accent">Travel Solutions</span></h1>
                     <p>Experience the gold standard in premium transportation. Book your high-end journey with
                         professional captains.</p>
-                    <div style="margin-top: 3rem; display: flex; gap: 1.5rem;">
-                        <button class="btn btn-primary">Book Now</button>
-                        <button class="btn" style="border: 1px solid rgba(255,255,255,0.3); color: white;">View
+                    <div style="margin-top: 3rem; display: flex; gap: 1.5rem; flex-wrap: wrap;" id="hero-actions">
+                        <button class="btn btn-primary guest-action" onclick="openMapPicker()">Book Now</button>
+                        <button class="btn guest-action" style="border: 1px solid rgba(255,255,255,0.3); color: white;"
+                            onclick="document.getElementById('fleet').scrollIntoView({behavior: 'smooth'})">View
                             Fleet</button>
+
+                        <button id="hero-dashboard-btn" class="btn btn-primary auth-action"
+                            style="display:none;">Traveler Hub</button>
+                        <button class="btn auth-action"
+                            style="display:none; border: 1px solid rgba(255,255,255,0.3); color: white;"
+                            onclick="logoutUser()">Logout</button>
                     </div>
                 </div>
 
@@ -54,12 +50,16 @@
                     <form id="booking-form" class="widget-form">
                         <div class="form-grid">
                             <div class="input-group">
-                                <label for="pickup">Pickup Location</label>
+                                <label for="pickup">Pickup Location <span onclick="openMapPicker('pickup')"
+                                        style="cursor:pointer; color:var(--primary-red); font-size:0.7rem; float:right;">(Pick
+                                        on Map)</span></label>
                                 <input type="text" id="pickup" placeholder="Enter pickup address" required>
                                 <div id="pickup-suggestions" class="suggestions"></div>
                             </div>
                             <div class="input-group">
-                                <label for="drop">Drop Location</label>
+                                <label for="drop">Drop Location <span onclick="openMapPicker('drop')"
+                                        style="cursor:pointer; color:var(--primary-red); font-size:0.7rem; float:right;">(Pick
+                                        on Map)</span></label>
                                 <input type="text" id="drop" placeholder="Enter destination" required>
                                 <div id="drop-suggestions" class="suggestions"></div>
                             </div>
@@ -136,27 +136,68 @@
                 </div>
             </div>
         </section>
-        <section id="features" class="section" style="background: var(--white);">
+        <section id="services" class="section" style="background: var(--light-grey);">
             <div class="container">
                 <div class="section-header">
-                    <h2>The <span class="text-accent">Elite</span> Standard</h2>
-                    <p>Why corporate houses and premium travelers choose our services.</p>
+                    <h2>Premium <span class="text-accent">Services</span></h2>
+                    <p>Tailored transportation solutions for discerning travelers.</p>
                 </div>
-                <div class="stats-grid">
-                    <div class="stat-card" style="text-align: center;">
-                        <h4 style="margin-top: 1rem;">Safety First</h4>
-                        <p style="margin-top: 1rem; opacity: 0.7;">Verified captains and real-time SOS tracking for
-                            every journey.</p>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <span class="service-icon">💼</span>
+                        <h3>Corporate Travel</h3>
+                        <p>Dedicated accounts and priority booking for mission-critical business travel.</p>
                     </div>
-                    <div class="stat-card" style="text-align: center;">
-                        <h4 style="margin-top: 1rem;">Luxury Interior</h4>
-                        <p style="margin-top: 1rem; opacity: 0.7;">Pristine vehicles with premium climate control and
-                            refreshments.</p>
+                    <div class="service-card">
+                        <span class="service-icon">✈️</span>
+                        <h3>Airport Transfers</h3>
+                        <p>Punctual arrivals and departures with real-time flight tracking integration.</p>
                     </div>
-                    <div class="stat-card" style="text-align: center;">
-                        <h4 style="margin-top: 1rem;">Fixed Fares</h4>
-                        <p style="margin-top: 1rem; opacity: 0.7;">No hidden charges or surge pricing. Transparent elite
-                            billing.</p>
+                    <div class="service-card">
+                        <span class="service-icon">🌟</span>
+                        <h3>Special Missions</h3>
+                        <p>Premium arrangements for events, weddings, and high-profile guest travel.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="section" style="background: var(--white);">
+            <div class="container">
+                <div class="contact-grid">
+                    <div class="contact-info-card">
+                        <h2 style="color:white; margin-bottom: 2rem;">Network <span
+                                class="text-accent">Headquarters</span></h2>
+                        <div class="contact-method">
+                            <div class="method-icon">📍</div>
+                            <div>
+                                <h4 style="color:white">Global Command</h4>
+                                <p style="opacity:0.6">123 Executive Plaza, Coimbatore, TN</p>
+                            </div>
+                        </div>
+                        <div class="contact-method">
+                            <div class="method-icon">✉️</div>
+                            <div>
+                                <h4 style="color:white">Signal Channel</h4>
+                                <p style="opacity:0.6">dispatch@elitecabs.com</p>
+                            </div>
+                        </div>
+                        <div class="contact-method">
+                            <div class="method-icon">📞</div>
+                            <div>
+                                <h4 style="color:white">Direct Line</h4>
+                                <p style="opacity:0.6">+91 98765 43210</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-text">
+                        <h2 style="margin-bottom: 1.5rem;">Initiate <span class="text-accent">Collaboration</span>
+                        </h2>
+                        <p style="color: var(--text-muted); margin-bottom: 2rem;">Interested in corporate partnership or
+                            joining our elite fleet? Reach out to our operational team for a consultation.</p>
+                        <button class="btn btn-primary"
+                            onclick="window.location.href='mailto:partners@elitecabs.com'">Initiate
+                            Collaboration</button>
                     </div>
                 </div>
             </div>
@@ -174,7 +215,8 @@
                 <ul>
                     <li><a href="#">About Us</a></li>
                     <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="driver-login.html" style="color:var(--primary-red); font-weight:700;">Driver Partner
+                            Access</a></li>
                 </ul>
             </div>
             <div class="footer-contact">
@@ -187,6 +229,26 @@
             <p>&copy; 2024 Elite Cabs. All rights reserved.</p>
         </div>
     </footer>
+
+    <div id="map-modal" class="map-modal">
+        <div class="map-modal-content">
+            <div class="map-header">
+                <h3>Select Location</h3>
+                <button class="close-map" onclick="closeMapPicker()">&times;</button>
+            </div>
+            <div id="map-picker"></div>
+            <div class="map-footer">
+                <p id="map-instructions">Click on the map to select your <strong id="picking-type">pickup</strong>
+                    point.</p>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-primary" id="confirm-location" style="display:none;"
+                        onclick="confirmMapPoint()">Confirm point</button>
+                    <button class="btn" style="background:var(--dark-charcoal); color:white;"
+                        onclick="closeMapPicker()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>

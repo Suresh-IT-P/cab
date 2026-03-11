@@ -4,102 +4,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Driver Terminal | Elite Cabs</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Elite Cabs | Driver Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        .driver-container {
+            padding: 120px 0;
+            background: #f4f4f4;
+            min-height: 100vh;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--accents);
+        }
+
+        .job-card {
+            background: #fafafa;
+            border: 1px solid #eee;
+            padding: 1.5rem;
+            border-radius: 16px;
+            margin-bottom: 1.5rem;
+        }
+
+        .customer-info {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px dashed #ccc;
+            font-size: 0.9rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
-<body style="background: #FAFBFC; padding: 4rem 0;">
-    <div class="container" style="max-width: 800px;">
-        <header class="driver-header">
-            <div class="driver-info">
-                <h2>Captain Rajesh</h2>
-                <p>ID: #DR-8822 | SUV Expert</p>
+<body>
+    <header class="header">
+        <nav class="container nav">
+            <div class="logo">
+                <span class="logo-accent">Elite</span>Partner
             </div>
-            <button class="btn btn-primary" style="background: #2ed573; border: none;">Go Offline</button>
-        </header>
+            <div class="driver-nav-actions">
+                <button class="btn btn-primary" onclick="logoutUser()"
+                    style="padding: 0.6rem 1.2rem; font-size: 0.9rem; background: var(--primary-red); border: none;">Logout</button>
+            </div>
+        </nav>
+    </header>
 
-        <h3 style="margin-bottom: 2.5rem; font-weight: 800; font-size: 1.75rem;">Incoming Requests</h3>
+    <main class="driver-container">
+        <div class="container">
+            <div style="margin-bottom: 3rem;">
+                <h1>Elite Partner: <span id="driver-name" class="text-accent">Loading...</span></h1>
+                <p id="car-info">Vehicle: Loading...</p>
+            </div>
 
-        <div id="job-list">
-            <!-- Jobs will be loaded dynamically -->
+            <div class="grid">
+                <!-- Available Jobs -->
+                <div class="panel">
+                    <h3 style="margin-bottom: 2rem;">Available Opportunities</h3>
+                    <div id="available-jobs">
+                        <!-- Jobs injected here -->
+                    </div>
+                </div>
+
+                <!-- My Active Rides -->
+                <div class="panel">
+                    <h3 style="margin-bottom: 2rem;">My Elite Assignments</h3>
+                    <div id="my-jobs">
+                        <!-- My jobs injected here -->
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        async function loadJobs() {
-            try {
-                const response = await fetch('/api/driver/jobs');
-                const jobs = await response.json();
-                const jobList = document.getElementById('job-list');
-
-                if (jobs.length > 0) {
-                    jobList.innerHTML = '';
-                    jobs.forEach(job => {
-                        const div = document.createElement('div');
-                        div.className = 'job-card';
-                        div.innerHTML = `
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 2rem; align-items: flex-start;">
-                                <span class="badge badge-warning">New Request</span>
-                                <div style="text-align: right;">
-                                    <span style="display: block; font-weight: 800; color: var(--primary-red); font-size: 1.5rem;">${job.fare}</span>
-                                    <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Est. Fare</span>
-                                </div>
-                            </div>
-                            
-                            <div style="margin-bottom: 2.5rem; border-left: 2px solid var(--accents); padding-left: 1.5rem; margin-left: 0.5rem;">
-                                <div style="position: relative; margin-bottom: 1.5rem;">
-                                    <div style="font-weight: 700; color: var(--dark-charcoal); font-size: 1.15rem;">${job.pickup_loc}</div>
-                                    <div style="font-size: 0.85rem; color: var(--text-muted);">Pickup Point</div>
-                                </div>
-                                <div style="position: relative;">
-                                    <div style="font-weight: 700; color: var(--dark-charcoal); font-size: 1.15rem;">${job.drop_loc}</div>
-                                    <div style="font-size: 0.85rem; color: var(--text-muted);">Destination</div>
-                                </div>
-                            </div>
-
-                            <div style="display: flex; gap: 1rem; align-items: center; justify-content: space-between; margin-bottom: 2rem; padding: 1rem; background: #f8fafc; border-radius: 12px;">
-                                <div style="font-size: 0.9rem; font-weight: 600;">👥 ${job.passengers} Passengers</div>
-                                <div style="font-size: 0.9rem; font-weight: 600;">⏰ ${job.pickup_time}</div>
-                            </div>
-
-                            <div style="display: flex; gap: 1rem;">
-                                <button class="btn btn-primary" style="flex: 2;" onclick="acceptJob(${job.id})">Accept Premium Ride</button>
-                                <button class="btn" style="flex: 1; border: 1px solid var(--accents); background: white; color: var(--text-muted);">Decline</button>
-                            </div>
-                        `;
-                        jobList.appendChild(div);
-                    });
-                } else {
-                    jobList.innerHTML = '<p style="text-align: center; opacity: 0.5; padding: 5rem; font-size: 1.1rem;">No pending requests at the moment. Safe driving!</p>';
-                }
-            } catch (err) {
-                console.error('Error loading jobs:', err);
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('elite_pilot'));
+            if (!user) {
+                window.location.href = 'driver-login.html';
+                return;
             }
+
+            document.getElementById('driver-name').textContent = user.name;
+            document.getElementById('car-info').textContent = `Vehicle: ${user.car_model} (${user.car_number})`;
+
+            loadAllJobs(user.id);
+
+            // Live Status Radar Array Poll (5 seconds)
+            setInterval(() => loadAllJobs(user.id), 5000);
+        });
+
+        async function loadAllJobs(driverId) {
+            loadAvailableJobs(driverId);
+            loadMyJobs(driverId);
         }
 
-        async function acceptJob(id) {
-            if (!confirm("Confirm acceptance of this ride?")) return;
-
+        async function loadAvailableJobs(driverId) {
             try {
-                const response = await fetch('/api/bookings/update-status', {
+                const res = await fetch('/api/driver/jobs');
+                const jobs = await res.json();
+                const container = document.getElementById('available-jobs');
+                container.innerHTML = jobs.length ? '' : '<p class="empty-state">No pending rides available in your area.</p>';
+
+                jobs.forEach(job => {
+                    const card = document.createElement('div');
+                    card.className = 'job-card';
+                    card.innerHTML = `
+                        <div class="badge" style="background:#e3f2fd; color:#1565c0">${job.vehicle_type}</div>
+                        <div style="font-weight:700">${job.pickup_loc}</div>
+                        <div style="font-size:0.85rem; color:#666">→ ${job.drop_loc}</div>
+                        <div style="margin: 0.5rem 0; font-size:0.85rem">📅 ${new Date(job.pickup_date).toLocaleDateString()} | ⏰ ${job.pickup_time}</div>
+                        <div style="font-weight:800; color:var(--primary-red); margin-bottom: 1rem;">Est. Fare: ${job.fare}</div>
+                        <button class="btn btn-primary" style="padding:0.6rem 1.2rem; font-size:0.8rem" onclick="acceptRide(${job.id}, ${driverId})">Accept Premium Job</button>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadMyJobs(driverId) {
+            try {
+                const res = await fetch(`/api/driver/my-jobs/${driverId}`);
+                const jobs = await res.json();
+                const container = document.getElementById('my-jobs');
+                container.innerHTML = jobs.length ? '' : '<p class="empty-state">You have no active assignments.</p>';
+
+                jobs.forEach(job => {
+                    const isCompleted = job.status === 'completed';
+                    const card = document.createElement('div');
+                    card.className = 'job-card';
+                    card.innerHTML = `
+                        <div class="badge" style="background:${isCompleted ? '#e8f5e9' : '#fff3e0'}; color:${isCompleted ? '#2e7d32' : '#e65100'}">${job.status}</div>
+                        <div style="font-weight:700">Trip #B${job.id}</div>
+                        <div style="font-size:0.85rem">${job.pickup_loc} → ${job.drop_loc}</div>
+                        
+                        <div class="customer-info">
+                            <div style="font-weight:700">Passenger Details:</div>
+                            <div>👤 ${job.customer_name}</div>
+                            <div>📞 <a href="tel:${job.customer_phone}" style="color:var(--primary-red)">${job.customer_phone}</a></div>
+                        </div>
+
+                        ${!isCompleted ? `
+                            <button class="btn btn-primary" style="margin-top:1rem; background:#28a745; border-color:#28a745" onclick="completeRide(${job.id}, ${driverId})">Mark Completed</button>
+                        ` : ''}
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function acceptRide(bookingId, driverId) {
+            if (!confirm('Accept this elite ride assignment?')) return;
+            try {
+                const res = await fetch('/api/bookings/accept', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ bookingId: id, status: 'assigned' })
+                    body: JSON.stringify({ bookingId, driverId })
                 });
-
-                if (response.ok) {
-                    alert("Ride accepted! Proceed to pickup.");
-                    loadJobs();
+                if (res.ok) {
+                    alert('Job Assigned Successfully!');
+                    loadAllJobs(driverId);
+                } else {
+                    const err = await res.json();
+                    alert(err.error);
                 }
-            } catch (err) {
-                console.error('Error accepting job:', err);
-            }
+            } catch (err) { alert('Action failed'); }
         }
 
-        loadJobs();
-        // Refresh every 15 seconds
-        setInterval(loadJobs, 15000);
+        async function completeRide(bookingId, driverId) {
+            try {
+                const res = await fetch('/api/bookings/update-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bookingId, status: 'completed' })
+                });
+                if (res.ok) {
+                    loadAllJobs(driverId);
+                }
+            } catch (err) { alert('Action failed'); }
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('elite_pilot');
+            window.location.href = 'driver-login.html';
+        }
     </script>
 </body>
 
