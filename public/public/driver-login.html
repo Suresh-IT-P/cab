@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Partner | Pilot Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), url('hero.png') no-repeat center center/cover;
+            padding: 2rem;
+        }
+
+        .auth-card {
+            background: rgba(26, 28, 30, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 4rem;
+            border-radius: 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+        .auth-card label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .auth-card input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .auth-card input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .partner-badge {
+            display: inline-block;
+            background: var(--primary-red);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="partner-badge">Partner Portal</div>
+            <div class="logo" style="margin-bottom: 3rem; text-align: left;">
+                <span class="logo-accent" style="color:var(--primary-red)">Elite</span>Partner
+            </div>
+
+            <h2 style="margin-bottom: 2rem; font-weight: 700;">Pilot Command Login</h2>
+
+            <form id="driver-login-form">
+                <div class="input-group">
+                    <label>Partner Email</label>
+                    <input type="email" id="login-email" placeholder="pilot@elitecabs.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Access Key</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">Initialize Session</button>
+            </form>
+
+            <div style="margin-top: 2rem; text-align: center; font-size: 0.85rem; color: rgba(255,255,255,0.4);">
+                Not a partner yet? Contact our Elite Fleet Management.
+            </div>
+
+            <div style="margin-top: 3rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 2rem;">
+                <a href="index.html" class="btn-back" style="color:white" title="Return to Main Hub">←</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('driver-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const res = await fetch('/api/driver/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await res.json();
+
+                if (res.ok) {
+                    localStorage.setItem('elite_pilot', JSON.stringify(result.user));
+                    window.location.href = 'driver.html';
+                } else {
+                    alert(result.error);
+                }
+            } catch (err) {
+                alert('Authorization failed');
+            }
+        });
+    </script>
+    <script src="alert.js"></script>
+</body>
+
+</html>
